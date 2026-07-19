@@ -1,0 +1,101 @@
+clc;
+clear;
+close all;
+
+Fs = 44100;
+duration = 0.5;
+notePause = 0.05;
+linePause = 0.40;
+
+Sa  = 220.00;
+Re  = 246.94;
+Ga  = 277.18;
+Ma  = 293.66;
+Pa  = 329.63;
+Dha = 369.99;
+
+line1 = [Sa Sa Pa Pa Dha Dha Pa];
+line2 = [Ma Ma Ga Ga Re Re Sa];
+line3 = [Pa Pa Ma Ma Ga Ga Re];
+line4 = [Pa Pa Ma Ma Ga Ga Re];
+line5 = [Sa Sa Pa Pa Dha Dha Pa];
+line6 = [Ma Ma Ga Ga Re Re Sa];
+
+song = {line1,line2,line3,line4,line5,line6};
+
+melody = [];
+
+sound(zeros(1000,1),Fs);
+pause(0.2);
+
+for i = 1:length(song)
+
+    notes = song{i};
+
+    for k = 1:length(notes)
+
+        t = 0:1/Fs:duration;
+        x = sin(2*pi*notes(k)*t);
+
+        figure(1)
+        plot(t(1:1000),x(1:1000),'LineWidth',1.5)
+        grid on
+        xlabel('Time (s)')
+        ylabel('Amplitude')
+        title('Current Note')
+        drawnow
+
+        melody = [melody x zeros(1,round(notePause*Fs))];
+
+        sound(x,Fs);
+        pause(duration+notePause);
+
+    end
+
+    melody = [melody zeros(1,round(linePause*Fs))];
+
+end
+
+audiowrite('TwinkleTwinkle.wav',melody,Fs);
+
+figure(2)
+tt = (0:length(melody)-1)/Fs;
+plot(tt,melody,'LineWidth',1)
+grid on
+xlabel('Time (s)')
+ylabel('Amplitude')
+title('Complete Audio Signal')
+
+exportgraphics(gcf,'CompleteWaveform.png','Resolution',300)
+
+N = length(melody);
+
+Y = fft(melody);
+
+P2 = abs(Y/N);
+
+P1 = P2(1:floor(N/2)+1);
+
+P1(2:end-1) = 2*P1(2:end-1);
+
+f = Fs*(0:floor(N/2))/N;
+
+figure(3)
+plot(f,P1,'LineWidth',1.5)
+grid on
+xlabel('Frequency (Hz)')
+ylabel('Magnitude')
+title('Frequency Spectrum')
+xlim([0 500])
+
+[pks,locs] = findpeaks(P1,f,...
+    'MinPeakHeight',max(P1)*0.1,...
+    'MinPeakDistance',20);
+
+hold on
+plot(locs,pks,'ro','MarkerFaceColor','r')
+
+disp('Detected Frequencies (Hz):')
+disp(locs')
+
+exportgraphics(gcf,'FrequencySpectrum.png','Resolution',300)
