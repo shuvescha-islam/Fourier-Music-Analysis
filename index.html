@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fourier Music Analysis - Sa Re Ga Ma Project</title>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f093fb, #f5576c, #4facfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient 3s ease-in-out infinite;
+        }
+
+        @keyframes gradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #a8b2d1;
+            margin-top: 10px;
+        }
+
+        .badge-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+
+        .badge:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .badge i {
+            margin-right: 8px;
+            color: #4facfe;
+        }
+
+        /* Section Cards */
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .section:hover {
+            border-color: rgba(79, 172, 254, 0.3);
+            box-shadow: 0 0 30px rgba(79, 172, 254, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title i {
+            color: #4facfe;
+            font-size: 2rem;
+        }
+
+        /* Grid Layout */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        /* Note Cards */
+        .note-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s;
+        }
+
+        .note-card:hover {
+            background: rgba(79, 172, 254, 0.1);
+            transform: scale(1.02);
+        }
+
+        .note-card .note-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #4facfe;
+        }
+
+        .note-card .note-freq {
+            font-size: 0.9rem;
+            color: #8892b0;
+        }
+
+        /* Audio Player */
+        .audio-container {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .audio-container audio {
+            width: 100%;
+            height: 40px;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 20px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #e6f1ff;
+            border-left: 4px solid #4facfe;
+        }
+
+        .code-block .comment {
+            color: #5a7a9a;
+        }
+
+        .code-block .keyword {
+            color: #ff79c6;
+        }
+
+        .code-block .function {
+            color: #50fa7b;
+        }
+
+        .code-block .string {
+            color: #f1fa8c;
+        }
+
+        .code-block .operator {
+            color: #ff79c6;
+        }
+
+        /* File List */
+        .file-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .file-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s;
+        }
+
+        .file-item:hover {
+            background: rgba(79, 172, 254, 0.15);
+            border-color: #4facfe;
+        }
+
+        .file-item i {
+            color: #4facfe;
+        }
+
+        /* Math Formula */
+        .formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .section-title {
+                font-size: 1.4rem;
+            }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #8892b0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 30px;
+        }
+
+        .footer a {
+            color: #4facfe;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Button */
+        .btn {
+            display: inline-block;
+            padding: 10px 25px;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.3);
+        }
+
+        /* List Styles */
+        .feature-list {
+            list-style: none;
+            line-height: 2;
+            color: #ccd6f6;
+        }
+
+        .feature-list li::before {
+            content: "✅ ";
+            color: #4facfe;
+        }
+
+        .tech-list {
+            list-style: none;
+            line-height: 2;
+            color: #ccd6f6;
+        }
+
+        .tech-list li::before {
+            content: "🔹 ";
+            color: #f5576c;
+        }
+
+        /* Viva Section */
+        .qa-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border-left: 3px solid #4facfe;
+        }
+
+        .qa-item strong {
+            color: #4facfe;
+        }
+
+        .qa-item .answer {
+            color: #8892b0;
+            margin-top: 5px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎵 Fourier Music Analysis</h1>
+            <p>Sa Re Ga Ma · Twinkle Twinkle Little Star · FFT Visualization</p>
+            <div class="badge-container">
+                <span class="badge"><i class="fas fa-code"></i> MATLAB</span>
+                <span class="badge"><i class="fas fa-chart-line"></i> FFT Analysis</span>
+                <span class="badge"><i class="fas fa-music"></i> Audio Processing</span>
+                <span class="badge"><i class="fas fa-calculator"></i> Fourier Series</span>
+                <span class="badge"><i class="fab fa-github"></i> Open Source</span>
+            </div>
+        </div>
+
+        <!-- Project Overview -->
+        <div class="section">
+            <div class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Project Overview
+            </div>
+            <p style="font-size: 1.1rem; line-height: 1.8; color: #ccd6f6;">
+                This project demonstrates the relationship between <strong>Fourier Series</strong> and 
+                <strong>music</strong> by generating a melody using pure sine waves and analyzing it 
+                with the <strong>Fast Fourier Transform (FFT)</strong>. Each musical note (Sa, Re, Ga, Ma, Pa, Dha) 
+                is created as a pure sine wave, and the complete melody is analyzed to reveal its 
+                frequency components.
+            </p>
+            <br>
+            <div class="grid-2">
+                <div>
+                    <h3 style="color: #4facfe;"><i class="fas fa-check-circle"></i> What's Included</h3>
+                    <ul class="feature-list">
+                        <li>MATLAB Code (main.m, music_generator.m, fft_analyzer.m)</li>
+                        <li>Audio File (Twinkle_Twinkle_SaReGaMa.wav)</li>
+                        <li>FFT Graphs and Visualizations</li>
+                        <li>Documentation (THEORY.md, PROJECT_REPORT.md)</li>
+                        <li>Example Scripts (single_note_demo.m)</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 style="color: #f5576c;"><i class="fas fa-microchip"></i> Technologies Used</h3>
+                    <ul class="tech-list">
+                        <li>MATLAB / Octave</li>
+                        <li>Signal Processing Toolbox</li>
+                        <li>FFT (Fast Fourier Transform)</li>
+                        <li>Audio Generation & Analysis</li>
+                        <li>Digital Signal Processing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Musical Notes -->
+        <div class="section">
+            <div class="section-title">
+                <i class="fas fa-music"></i>
+                Musical Notes (Sa Re Ga Ma Pa Dha)
+            </div>
+            <div class="grid-3">
+                <div class="note-card">
+                    <div class="note-name">Sa</div>
+                    <div class="note-freq">261.63 Hz</div>
+                    <div style="font-size: 0.8rem; color: #5a7a9a;">C</div>
+                </div>
+                <div class="note-card">
+                    <div class="note-name">Re</div>
+                    <div class="note-freq">293.66 Hz</div>
+                    <div style="font-size: 0.8rem; color: #5a7a9a;">D</div>
+                </div>
+                <div class="note-card">
+                    <div class="note-name">Ga</div>
+                    <div class="note-freq">329.63 Hz</div>
+                    <div style="font-size: 0.8rem; color: #5a7a9a;">E</div>
+                </div>
+                <div class="note-card">
+                    <div class="note-name">Ma</div>
+                    <div class="note-freq">349.23 Hz</div>
+                    <div style="font-size: 0.8rem; color: #5a7a9a;">F</div>
+                </div>
+                <div class="note-card">
+                    <div class="note-name">Pa</div>
+                    <div class="note-freq">392.00 Hz</div>
+                    <div style="font-size: 0.8rem; color: #5a7a9a;">G</div>
+                </div>
+                <div class="note-card">
+                    <div class="note-name">Dha</div>
+                    <div class="note-freq">440.00 Hz</div>
+                    <div style="font-size: 0.8rem; color: #5a7a9a;">A</div>
+                </div>
+            </div>
+            <p style="color: #8892b0; margin-top: 15px; text-align: center; font-size: 0.95rem;">
+                <i class="fas fa-info-circle"></i> 
+                Each note is generated as a pure sine wave: <strong>sin(2π × frequency × t)</strong>
+            </p>
+        </div>
+
+        <!-- Audio Player -->
+        <div class="section">
+            <div class="section-title">
+                <i class="fas fa-headphones"></i>
+                Listen to the Melody
+            </div>
+            <div class="audio-container">
+                <audio controls>
+                    <source src="Twinkle_Twinkle_SaReGaMa.wav" type="audio/wav">
+                    Your browser does not support the audio element.
+                </audio>
+                <p style="color: #8892b0; margin-top: 10px; font-size: 0.9rem;">
+                    <i class="fas fa-info-circle"></i> 
+                    "Twinkle Twinkle Little Star" in Sa Re Ga Ma notation
+                </p>
+            </div>
+        </div>
+
+        <!-- Melody Sequence -->
+        <div class="section">
+            <div class="section-title">
+                <i class="fas fa-list"></i>
+                Melody Sequence
+            </div>
+            <div class="code-block" style="text-align: center; font-size: 1.1rem;">
+                <span class="comment">% Twinkle Twinkle in Sa Re Ga Ma</span><br>
+                Sa &nbsp; Sa &nbsp; Pa &nbsp; Pa &nbsp; Dha &nbsp; Dha &nbsp; Pa &nbsp;<br>
+                Ma &nbsp; Ma &nbsp; Ga &nbsp; Ga &nbsp; Re &nbsp; Re &nbsp; Sa &nbsp;<br>
+                Pa &nbsp; Pa &nbsp; Ma &nbsp; Ma &nbsp; Ga &nbsp; Ga &nbsp; Re &nbsp;<br>
+                Pa &nbsp; Pa &nbsp; Ma &nbsp; Ma &nbsp; Ga &nbsp; Ga &nbsp; Re &nbsp;<br>
+                Sa &nbsp; Sa &nbsp; Pa &nbsp; Pa &nbsp; Dha &nbsp; Dha &nbsp; Pa &nbsp;<br>
+                Ma &nbsp; Ma &nbsp; Ga &nbsp; Ga &nbsp; Re &nbsp; Re &nbsp; Sa &nbsp;
+            </div>
+        </div>
+
+        <!-- Fourier Series Math -->
+        <div class="section">
+            <div class="section-title">
+                <i class="fas fa-square-root-variable"></i>
+                Fourier Series Connection
+            </div>
+            <div class="grid-2">
+                <div>
+                    <h4 style="color: #4facfe;">Fourier Series Formula</h4>
+                    <div class="formula">
+                        f(t) = a₀ + Σ(aₙ·cos(nω₀t) + bₙ·sin(nω₀t))
+                    </div>
+                    <p style="color: #ccd6f6; line-height: 1.8; font-size: 0.95rem;">
+                        <strong>Each note = A sine wave:</strong><br>
+                        <span class="formula" style="font-size: 1rem; display: inline-block; padding: 8px 15px;">
+                            Note(t) = sin(2π × f × t)
+                        </span>
+                    </p>
+                    <p style="color: #8892b0; font-size: 0.9rem; margin-top: 10px;">
+                        Where <strong>f</strong> is the frequency (e.g., Sa = 261.63 Hz)
+                    </p>
+                </div>
+                <div>
+                    <h4 style="color: #f5576c;">FFT Implementation</h4>
+                    <div class="formula">
+                        X(k) = Σ x(n)·e<sup>-j2πkn/N</sup>
+                    </div>
+                    <p style="color: #ccd6f6; line-height: 1.8; font-size: 0.95rem;">
+                        <strong>MATLAB Code:</strong><br>
+                        <span class="code-block" style="font-size: 0.85rem; display: inline-block; margin-top: 5px;">
+                            Y = fft(song);<br>
+                            magnitude = abs(Y)/N;
+                        </span>
+                    </p>
+                    <p style="color: #8892b0; font-size: 0.9rem; margin-top: 10px;">
+                        The FFT computes the <strong>Discrete Fourier Transform</strong> of the sampled signal.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key MATLAB Code -->
+        <div class="section">
+            <div class="section-title">
+                <i class="fas fa-code"></i>
+                Key MATLAB Code Snippets
+            </div>
+            <div class="grid-2">
+                <div>
+                    <h4 style="color: #4facfe;">🎵 Generate Notes</h4>
+                    <div class="code-block">
+                        <span class="comment">% Define frequencies</span><br>
+                        Sa = <span class="keyword">261.63</span>;<br>
+                        Re = <span class="keyword">293.66</span>;<br>
+                        Ga = <span class="keyword">329.63</span>;<br>
+                        <br>
+                        <span class="comment">% Create a note</span><br>
+                        note = <span class="function">sin</span>(<span class="keyword">2*pi</span>*Sa*t);
+                    </div>
+                </div>
+                <div>
+                    <h4 style="color: #f5576c;">📊 FFT Analysis</h4>
+                    <div class="code-block">
+                        <span class="comment">% FFT Computation</span><br>
+                        N = <span class="function">length</span>(song);<br>
+                        Y = <span class="function">fft</span>(song);<br>
+                        f = (<span class="keyword">0</span>:N-<span class="keyword">1</span>)*(Fs/N);<br>
+                        magnitude = <span class="function">abs</span>(Y)/N;<br>
+                        <br>
+                        <span class="comment">% Plot spectrum</span><br>
+                        <span class="function">plot</span>(f(<span class="keyword">1</span>:N/<span class="keyword">2</span>), magnitude(<span class="keyword">1</span>:N/<span class="keyword">2</span>));
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Complete MATLAB Code -->
+        <div class="section">
+            <div class="section-title">
+                <i class="fas fa-file-code"></i>
+                Complete Main Script (main.m)
+            </div>
+            <div class="code-block" style="max-height: 400px; overflow-y: auto;">
+                <span class="comment">%% 🎵 Fourier Music Analysis - Main Script</span><br>
+                <span class="comment">% This script demonstrates the relationship between Fourier Series and</span><br>
+                <span class="comment">% music by generating a melody and analyzing it with FFT.</span><br>
+                <br>
+                clc; clear; close all;<br>
+                <br>
+                <span class="comment">%% Step 1: Setup Parameters</span><br>
+                Fs = 8000;  <span class="comment">% Sampling frequency (Hz)</span><br>
+                duration = 0.3;  <span class="comment">% Duration of each note (seconds)</span><br>
+                t = 0:1/Fs:duration-1/Fs;  <span class="comment">% Time vector</span><br>
+                <br>
+                <span class="comment">%% Step 2: Define Musical Notes</span><br>
+                Sa = 261.63;    <span class="comment">% C</span><br>
+                Re = 293.66;    <span class="comment">% D</span><br>
+                Ga = 329.63;    <span class="comment">% E</span><br>
+                Ma = 349.23;    <span class="comment">% F</span><br>
+                Pa = 392.00;    <span class="comment">% G</span><br>
+                Dha = 440.00;   <span class="comment">% A</span><br>
+                <br>
+                <span class="comment">%% Step 3: Create Melody</span><br>
+                melody = [Sa Sa Pa Pa Dha Dha Pa ...<br>
+                          Ma Ma Ga Ga Re Re Sa ...<br>
+                          Pa Pa Ma Ma Ga Ga Re ...<br>
+                          Pa Pa Ma Ma Ga Ga Re ...<br>
+                          Sa Sa Pa Pa Dha Dha Pa ...<br>
+                          Ma Ma Ga Ga Re Re Sa];<br>
+                <br>
+                <span class="comment">%% Step 4: Generate Audio Signal</span><br>
+                song = [];<br>
+                <span class="keyword">for</span> i = 1:length(melody)<br>
+                    note = sin(<span class="keyword">2*pi</span>*melody(i)*t);<br>
+                    song = [song note];<br>
+                <span class="keyword">end</span><br>
+                song = song / max(abs(song));  <span class="comment">% Normalize</span><br>
+                <br>
+                <span class="comment">%% Step 5: Play and Save Audio</span><br>
+                sound(song, Fs);<br>
+                audiowrite(<span class="string">'Twinkle_Twinkle_SaReGaMa.wav'</span>, song, Fs);<br>
+                <br>
+                <span class="comment">%% Step 6: FFT Analysis</span><br>
+                N = length(song);<br>
+                Y = fft(song);<br>
+                f = (0:N-1)*(Fs/N);<br>
+                magnitude = abs(Y)/N;<br>
+                <br>
+                <span class="comment">%% Step 7: Plot Frequency Spectrum</span><br>
+                figure;<br>
+                plot(f(1:N/2), magnitude(1:N/2));<br>
+                xlabel(<span class="string">'Frequency (Hz)'</span>);<br>
+                ylabel(<span class="string">'Magnitude'</span>);<br>
+                title(<span class="string">'FFT of Twinkle Twinkle Little Star'</span>);<br>
+                grid on;<br>
+                <br>
+                <span class="comment">%% Step 8: Find Dominant Frequencies</span><br>
+                [~, index] = sort(magnitude(1:N/2), <span class="string">'descend'</span>);<br>
+                dominant_frequencies = f(index(1:10));<br>
+                disp(<span class="string">'Dominant Frequencies:'</span>);<br>
+                disp(dominant_frequencies);
+            </div>
+        </div>
+
+        <!-- Files in Repository -->
+        <div class="section">
+            <div class="section-title">
+                <i class="fas fa-folder"></i>
+                Repository Files
+            </div>
+            <div class="file-list">
+                <div class="file-item"><i class="fas fa-file-code"></i> README.md</div>
+                <div class="file-item"><i class="fas fa-file-code"></i> main.m</div>
+                <div class="file-item"><i class="fas fa-file-code"></i> music_generator.m</div>
+                <div class="file-item"><i class="fas fa-file-code"></i> fft_analyzer.m</div>
+                <div class="file-item"><i class="fas fa-file-code"></i> TwinkleTwinke.m</div>
+                <div class="file-item"><i class="fas fa-file-code"></i> TwinkleTwinke.asv</div>
+                <div class="file-item"><i class="fas fa-file-audio"></i> Twinkle_Twinkle_SaReGaMa.wav</div>
+                <div class="file-item"><i class="fas fa-file-image"></i> TwinkleTwinkle.jpg</div>
+                <div class="file-item"><i class="fas fa-file-alt"></i> LICENSE</div>
+                <div class="file-item"><i class="fas fa-file-alt"></i> .gitignore</div>
+                <div class="file-item"><i class="fas fa-folder"></i> results/</div>
+                <div class="file-item"><i class="fas fa-folder"></i> docs/</div>
+                <div class="file-item"><i class="fas fa-folder"></i> examples/</div>
+            </div>
+        </div>
+
+        <!-- How to Run -->
+        <div class="section">
+            <div class="section-title">
+                <i class="fas fa-play"></i>
+                How to Run
+            </div>
+            <div class="code-block">
+                <span class="comment">% Step 1: Open MATLAB in project folder</span><br>
+                >> <span class="keyword">cd</span>(<span class="string">'path/to/Fourier-Music-Analysis'</span>);<br>
+                <br>
+                <span class="comment">% Step 2: Run main script</span><br>
+                >> <span class="function">main</span><br>
+                <br>
+                <span class="comment">% Step 3: Listen to the melody and see FFT plot!</span>
+            </div>
+            <br>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <a href="https://github.com/shuvescha-islam/Fourier-Music-Analysis" class="btn"><i class="fab fa-github"></i> View on GitHub</a>
+                <a href="#" class="btn btn-secondary"><i class="fas fa-download"></i> Download ZIP</a>
+            </div>
+        </div>
+
+        <!-- Results Preview -->
+        <div class="section">
+            <div class="section-title">
+                <i class="fas fa-chart-bar"></i>
+                FFT Results Preview
+            </div>
+            <div style="text-align: center;">
+                <img src="TwinkleTwinkle.jpg" alt="FFT Spectrum" style="max-width: 100%; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                <p style="color: #8892b0; margin-top: 10px; font-size: 0.9rem;">
+                    <i class="fas fa-info-circle"></i> 
+                    The FFT graph shows frequency peaks corresponding to Sa, Re, Ga, Ma, Pa, Dha
+                </p>
+            </div>
+        </div>
+
+        <!-- Theory Summary -->
+        <div class="section">
+            <div class="section-title">
+                <i class="fas fa-graduation-cap"></i>
+                Viva / Interview Preparation
+            </div>
+            
+            <div class="qa-item">
+                <strong>❓ What is Fourier Series?</strong>
+                <span class="answer">
+                    Fourier Series states that any periodic signal can be expressed as a sum of sine and cosine waves 
+                    with different frequencies and amplitudes.
+                </span>
+            </div>
+
+            <div class="qa-item">
+                <strong>❓ How does this project use Fourier Series?</strong>
+                <span class="answer">
+                    Each musical note is generated as a sine wave (sin(2π×f×t)). The complete melody is a combination 
+                    of these waves. FFT breaks the melody back into its frequency components, showing the original notes.
+                </span>
+            </div>
+
+            <div class="qa-item">
+                <strong>❓ Why FFT instead of Fourier Series?</strong>
+                <span class="answer">
+                    Our melody is finite (not infinitely periodic) and digitally sampled. Fourier Series requires 
+                    periodic signals, so we use the Discrete Fourier Transform (implemented as FFT) for our digital signal.
+                </span>
+            </div>
+
+            <div class="qa-item">
+                <strong>❓ What do the FFT peaks represent?</strong>
+                <span class="answer">
+                    Each peak corresponds to a musical note frequency: Sa (261.63 Hz), Re (293.66 Hz), Ga (329.63 Hz), 
+                    Ma (349.23 Hz), Pa (392.00 Hz), and Dha (440.00 Hz). Higher peaks mean the note was played more times.
+                </span>
+            </div>
+
+            <div class="qa-item">
+                <strong>❓ What is the difference between Fourier Series and Fourier Transform?</strong>
+                <span class="answer">
+                    Fourier Series is for periodic signals and gives discrete frequency components. Fourier Transform 
+                    is for non-periodic signals and gives a continuous frequency spectrum. We use FFT (Fast Fourier 
+                    Transform) which is the computational implementation of the Discrete Fourier Transform.
+                </span>
+            </div>
+
+            <div class="qa-item">
+                <strong>❓ How is the signal normalized and why?</strong>
+                <span class="answer">
+                    The signal is normalized using <strong>song = song / max(abs(song))</strong> to scale all values 
+                    between -1 and 1. This prevents audio clipping when playing the sound and maintains consistent volume.
+                </span>
+            </div>
+        </div>
+
+        <!-- Key Takeaways -->
+        <div class="section">
+            <div class="section-title">
+                <i class="fas fa-lightbulb"></i>
+                Key Takeaways
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div style="background: rgba(79, 172, 254, 0.1); padding: 20px; border-radius: 12px; border-left: 4px solid #4facfe;">
+                    <h4 style="color: #4facfe;">🎵 Music = Sine Waves</h4>
+                    <p style="color: #8892b0; font-size: 0.95rem;">Every musical note is fundamentally a sine wave at a specific frequency.</p>
+                </div>
+                <div style="background: rgba(245, 87, 108, 0.1); padding: 20px; border-radius: 12px; border-left: 4px solid #f5576c;">
+                    <h4 style="color: #f5576c;">📊 FFT Reveals Frequencies</h4>
+                    <p style="color: #8892b0; font-size: 0.95rem;">FFT decomposes any signal into its constituent frequency components.</p>
+                </div>
+                <div style="background: rgba(80, 250, 123, 0.1); padding: 20px; border-radius: 12px; border-left: 4px solid #50fa7b;">
+                    <h4 style="color: #50fa7b;">🔬 Fourier Analysis</h4>
+                    <p style="color: #8892b0; font-size: 0.95rem;">Fourier analysis lets us work in both time and frequency domains.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>
+                <i class="fas fa-code"></i> Made with ❤️ using MATLAB &nbsp;|&nbsp; 
+                <a href="https://github.com/shuvescha-islam/Fourier-Music-Analysis">
+                    <i class="fab fa-github"></i> GitHub Repository
+                </a>
+                &nbsp;|&nbsp; 
+                <span id="datetime"></span>
+            </p>
+            <p style="font-size: 0.85rem; margin-top: 5px;">
+                📚 Fourier Series · 🎵 Music · 📊 Signal Processing · 🔬 MATLAB · 🎹 Sa Re Ga Ma
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Update date/time
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            };
+            document.getElementById('datetime').textContent = now.toLocaleDateString('en-US', options);
+        }
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+    </script>
+</body>
+</html>
